@@ -4,6 +4,7 @@ using ProductAPI.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ProductAPI.Infrastructure.Persistence
@@ -16,5 +17,10 @@ namespace ProductAPI.Infrastructure.Persistence
 		}
 
 		public DbSet<Product> Products { get; set; }
+
+		public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+		{
+			return base.SaveChangesAsync(cancellationToken);
+		}
 	}
 }
