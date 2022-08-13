@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProductAPI.Application.Features.Products.Commands.AddProduct;
+using ProductAPI.Application.Features.Products.Queries.GetAllProduct;
 using ProductAPI.Application.Features.Products.Queries.GetProduct;
 using ProductAPI.Domain.Entities;
 using System;
@@ -20,6 +22,27 @@ namespace ProductAPI.Controllers
 		{
 			var product = await Mediator.Send(new GetProductQuery { Id = id });
 			return Ok(product);
+		}
+
+		[HttpGet(Name = "Get All Product Details")]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+		[ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.NotFound)]
+		public async Task<IActionResult> Get()
+		{
+			var product = await Mediator.Send(new GetAllProductQuery());
+			return Ok(product);
+		}
+
+		[HttpPost(Name = "Add a new product")]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+		[ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.NotFound)]
+		[ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.InternalServerError)]
+		public async Task<IActionResult> Post([FromBody] AddProductCommand product)
+		{
+			var result = await Mediator.Send(product);
+			return Ok(result);
 		}
 	}
 }

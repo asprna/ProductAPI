@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace ProductAPI.Application.Behaviours
 {
+	/// <summary>
+	/// Exception Pipeline, All the application exception goes through this pipeline.
+	/// </summary>
+	/// <typeparam name="TRequest"></typeparam>
+	/// <typeparam name="TResponse"></typeparam>
 	public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : MediatR.IRequest<TResponse>
 	{
 		private readonly ILogger<TRequest> _logger;
