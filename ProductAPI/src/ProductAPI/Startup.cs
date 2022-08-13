@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using ProductAPI.Application.Contracts.Persistence;
+using ProductAPI.Infrastructure.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +19,11 @@ namespace ProductAPI
 {
 	public class Startup
 	{
+		private IConfiguration _config;
+
 		public Startup(IConfiguration configuration)
 		{
-			Configuration = configuration;
+			_config = configuration;
 		}
 
 		public IConfiguration Configuration { get; }
@@ -26,6 +31,13 @@ namespace ProductAPI
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			//Register DataContext
+			services.AddDbContext<DataContext>(opt =>
+			{
+				opt.UseSqlite(_config.GetConnectionString("DefaultConnection"));
+			});
+
+			services.AddScoped<IApplicationDbContext>(provider => provider.GetService<DataContext>());
 
 			services.AddControllers();
 			services.AddSwaggerGen(c =>
