@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProductAPI.Application.Features.Products.Commands.AddProduct;
 using ProductAPI.Application.Features.Products.Queries.GetAllProduct;
 using ProductAPI.Application.Features.Products.Queries.GetProduct;
 using ProductAPI.Domain.Entities;
@@ -31,6 +32,16 @@ namespace ProductAPI.Controllers
 		{
 			var product = await Mediator.Send(new GetAllProductQuery());
 			return Ok(product);
+		}
+
+		[HttpPost(Name = "Add a new product")]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+		[ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.NotFound)]
+		public async Task<IActionResult> Post([FromBody] AddProductCommand product)
+		{
+			var result = await Mediator.Send(product);
+			return Ok(result);
 		}
 	}
 }

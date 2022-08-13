@@ -25,4 +25,8 @@
     <ProjectReference Include="..\..\src\ProductAPI\ProductAPI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Products\Commands\" />
+  </ItemGroup>
+
 </Project>
