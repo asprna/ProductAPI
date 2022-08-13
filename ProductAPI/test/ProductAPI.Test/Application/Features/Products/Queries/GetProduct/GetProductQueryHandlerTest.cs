@@ -5,6 +5,7 @@ using ProductAPI.Application.Contracts.Persistence;
 using ProductAPI.Application.Exceptions;
 using ProductAPI.Application.Features.Products.Queries.GetProduct;
 using ProductAPI.Domain.Entities;
+using ProductAPI.Test.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,9 @@ using Xunit;
 
 namespace ProductAPI.Test.Features.Products.Queries.GetProduct
 {
-	public class GetProductQueryHandlerTest
+	public class GetProductQueryHandlerTest : ProductTestBase
 	{
 		private GetProductQueryHandler sut;
-		private readonly Mock<IApplicationDbContext> _context = new Mock<IApplicationDbContext>();
 		private readonly Mock<ILogger<GetProductQueryHandler>> _logger = new Mock<ILogger<GetProductQueryHandler>>();
 
 		[Fact]
@@ -37,11 +37,7 @@ namespace ProductAPI.Test.Features.Products.Queries.GetProduct
 				}
 			};
 
-			var mockDbSet = products.AsQueryable().BuildMockDbSet();
-
-			_context.Setup(db => db.Products).Returns(mockDbSet.Object);
-
-			sut = new GetProductQueryHandler(_context.Object, _logger.Object);
+			sut = new GetProductQueryHandler(_context, _logger.Object);
 
 			var request = new GetProductQuery { Id = 1 };
 
@@ -49,7 +45,7 @@ namespace ProductAPI.Test.Features.Products.Queries.GetProduct
 			var result = await sut.Handle(request, CancellationToken.None);
 
 			//Assert
-			Assert.Equal(products[0], result);
+			Assert.Equal(SeedProductData.Products.Where(x => x.Id == 1).FirstOrDefault(), result);
 		}
 
 		[Fact]
@@ -68,13 +64,9 @@ namespace ProductAPI.Test.Features.Products.Queries.GetProduct
 				}
 			};
 
-			var mockDbSet = products.AsQueryable().BuildMockDbSet();
+			sut = new GetProductQueryHandler(_context, _logger.Object);
 
-			_context.Setup(db => db.Products).Returns(mockDbSet.Object);
-
-			sut = new GetProductQueryHandler(_context.Object, _logger.Object);
-
-			var request = new GetProductQuery { Id = 2 };
+			var request = new GetProductQuery { Id = 3 };
 
 			//Act & Assert
 			NotFoundException result = await Assert.ThrowsAsync<NotFoundException>(() => sut.Handle(request, CancellationToken.None));

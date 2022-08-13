@@ -4,6 +4,7 @@ using Moq;
 using ProductAPI.Application.Contracts.Persistence;
 using ProductAPI.Application.Features.Products.Queries.GetAllProduct;
 using ProductAPI.Domain.Entities;
+using ProductAPI.Test.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,9 @@ using Xunit;
 
 namespace ProductAPI.Test.Features.Products.Queries.GetAllProduct
 {
-	public class GetAllProductQueryHandlerTest
+	public class GetAllProductQueryHandlerTest : ProductTestBase
 	{
 		private GetAllProductQueryHandler sut;
-		private readonly Mock<IApplicationDbContext> _context = new Mock<IApplicationDbContext>();
 		private readonly Mock<ILogger<GetAllProductQueryHandler>> _logger = new Mock<ILogger<GetAllProductQueryHandler>>();
 
 		[Fact]
@@ -44,11 +44,7 @@ namespace ProductAPI.Test.Features.Products.Queries.GetAllProduct
 				},
 			};
 
-			var mockDbSet = products.AsQueryable().BuildMockDbSet();
-
-			_context.Setup(db => db.Products).Returns(mockDbSet.Object);
-
-			sut = new GetAllProductQueryHandler(_context.Object, _logger.Object);
+			sut = new GetAllProductQueryHandler(_context, _logger.Object);
 
 			var request = new GetAllProductQuery();
 
@@ -56,7 +52,7 @@ namespace ProductAPI.Test.Features.Products.Queries.GetAllProduct
 			var result = await sut.Handle(request, CancellationToken.None);
 
 			//Assert
-			Assert.Equal(products.Count, result.Count);
+			Assert.Equal(SeedProductData.Products.Count, result.Count);
 		}
 
 		[Fact]
@@ -65,11 +61,11 @@ namespace ProductAPI.Test.Features.Products.Queries.GetAllProduct
 			//Arrange
 			var products = new List<Product>();
 
-			var mockDbSet = products.AsQueryable().BuildMockDbSet();
+			var product = _context.Set<Product>();
+			_context.Products.RemoveRange(product);
+			await _context.SaveChangesAsync(CancellationToken.None);
 
-			_context.Setup(db => db.Products).Returns(mockDbSet.Object);
-
-			sut = new GetAllProductQueryHandler(_context.Object, _logger.Object);
+			sut = new GetAllProductQueryHandler(_context, _logger.Object);
 
 			var request = new GetAllProductQuery();
 
