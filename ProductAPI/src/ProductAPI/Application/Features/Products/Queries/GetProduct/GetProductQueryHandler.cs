@@ -29,7 +29,7 @@ namespace ProductAPI.Application.Features.Products.Queries.GetProduct
 			_cache = cache;
 
 			cacheOptions = new MemoryCacheEntryOptions()
-					.SetSlidingExpiration(TimeSpan.FromSeconds(10));
+					.SetSlidingExpiration(TimeSpan.FromMinutes(10));
 		}
 
 		public async Task<Product> Handle(GetProductQuery request, CancellationToken cancellationToken)
