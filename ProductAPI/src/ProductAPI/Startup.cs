@@ -1,3 +1,4 @@
+using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -14,6 +15,7 @@ using Microsoft.OpenApi.Models;
 using ProductAPI.Application.Behaviours;
 using ProductAPI.Application.Contracts.Persistence;
 using ProductAPI.Application.Exceptions;
+using ProductAPI.Extensions;
 using ProductAPI.Infrastructure.Persistence;
 using System;
 using System.Collections.Generic;
@@ -48,6 +50,9 @@ namespace ProductAPI
 
 			services.AddMediatR(Assembly.GetExecutingAssembly());
 			services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
+			services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+
+			services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
 			services.AddControllers();
 
@@ -86,7 +91,7 @@ namespace ProductAPI
 		private void ConfigureProblemDetails(ProblemDetailsOptions options)
 		{
 			// Custom mapping function for FluentValidation's ValidationException.
-			//options.MapFluentValidationException();
+			options.MapFluentValidationException();
 
 			options.IncludeExceptionDetails = (ctx, ex) =>
 			{

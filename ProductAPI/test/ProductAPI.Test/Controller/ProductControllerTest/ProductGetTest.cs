@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Moq.Protected;
+using ProductAPI.Application.Exceptions;
 using ProductAPI.Controllers;
 using System;
 using System.Collections.Generic;
@@ -35,19 +36,6 @@ namespace ProductAPI.Test.Controller.ProductControllerTest
 
 			//Assert
 			Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
-		}
-
-		[Fact]
-		public async Task Get_ProductNotFound_ReturnStatus404()
-		{
-			//Arrange
-			var productId = 9999;
-
-			//Act
-			var result = await sut.Object.Get(productId) as ObjectResult;
-
-			//Assert
-			Assert.Equal(StatusCodes.Status404NotFound, result.StatusCode);
 		}
 	}
 }
