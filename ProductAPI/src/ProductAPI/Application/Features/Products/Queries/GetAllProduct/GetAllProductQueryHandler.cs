@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace ProductAPI.Application.Features.Products.Queries.GetAllProduct
 {
+	/// <summary>
+	/// Getting all products.
+	/// </summary>
 	public class GetAllProductQueryHandler : IRequestHandler<GetAllProductQuery, List<Product>>
 	{
 		private readonly IApplicationDbContext _context;

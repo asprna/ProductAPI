@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace ProductAPI.Application.Features.Products.Commands.AddProduct
 {
+	/// <summary>
+	/// Add Product
+	/// </summary>
 	public class AddProductCommandHandler : IRequestHandler<AddProductCommand, int>
 	{
 		private readonly IApplicationDbContext _context;

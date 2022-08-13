@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace ProductAPI.Application.Features.Products.Queries.GetProduct
 {
+	/// <summary>
+	/// Get product by Id.
+	/// </summary>
 	public class GetProductQueryHandler : IRequestHandler<GetProductQuery, Product>
 	{
 		private readonly IApplicationDbContext _context;

@@ -38,6 +38,7 @@ namespace ProductAPI.Controllers
 		[Produces("application/json")]
 		[ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.NotFound)]
+		[ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.InternalServerError)]
 		public async Task<IActionResult> Post([FromBody] AddProductCommand product)
 		{
 			var result = await Mediator.Send(product);
