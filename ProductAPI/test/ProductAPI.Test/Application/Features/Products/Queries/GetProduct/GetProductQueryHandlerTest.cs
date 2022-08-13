@@ -1,10 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
 using Moq;
 using ProductAPI.Application.Contracts.Persistence;
 using ProductAPI.Application.Exceptions;
 using ProductAPI.Application.Features.Products.Queries.GetProduct;
 using ProductAPI.Domain.Entities;
+using ProductAPI.Test.Extensions;
 using ProductAPI.Test.Helper;
 using System;
 using System.Collections.Generic;
@@ -20,24 +23,22 @@ namespace ProductAPI.Test.Features.Products.Queries.GetProduct
 	{
 		private GetProductQueryHandler sut;
 		private readonly Mock<ILogger<GetProductQueryHandler>> _logger = new Mock<ILogger<GetProductQueryHandler>>();
+		private readonly IMemoryCache _cache;
+
+		public GetProductQueryHandlerTest()
+		{
+			var services = new ServiceCollection();
+			services.AddMemoryCache();
+			var serviceProvider = services.BuildServiceProvider();
+			var memoryCache = serviceProvider.GetService<IMemoryCache>();
+			_cache = memoryCache;
+		}
 
 		[Fact]
 		public async Task Handler_ProductExists_ReturnProduct()
 		{
 			//Arrange
-			var products = new List<Product>
-			{
-				new Product
-				{
-					Id = 1,
-					Name = "Apple",
-					Description = "Fruit",
-					DeliveryPrice = 1.00m,
-					Price = 5.00m
-				}
-			};
-
-			sut = new GetProductQueryHandler(_context, _logger.Object);
+			sut = new GetProductQueryHandler(_context, _logger.Object, _cache);
 
 			var request = new GetProductQuery { Id = 1 };
 
@@ -52,25 +53,50 @@ namespace ProductAPI.Test.Features.Products.Queries.GetProduct
 		public async Task Handler_ProductNotExists_ReturnNotFound()
 		{
 			//Arrange
-			var products = new List<Product>
-			{
-				new Product
-				{
-					Id = 1,
-					Name = "Apple",
-					Description = "Fruit",
-					DeliveryPrice = 1.00m,
-					Price = 5.00m
-				}
-			};
-
-			sut = new GetProductQueryHandler(_context, _logger.Object);
+			sut = new GetProductQueryHandler(_context, _logger.Object, _cache);
 
 			var request = new GetProductQuery { Id = 3 };
 
 			//Act & Assert
 			NotFoundException result = await Assert.ThrowsAsync<NotFoundException>(() => sut.Handle(request, CancellationToken.None));
 			Assert.Equal("Product not found", result.Message);
+		}
+
+		[Fact]
+		public async Task Handler_ProductViaMemoryCache_ReturnProduct()
+		{
+			//Arrange
+			var id = 1;
+			sut = new GetProductQueryHandler(_context, _logger.Object, _cache);
+
+			var request = new GetProductQuery { Id = id };
+
+			//Act
+
+			_cache.Set($"productapi_{id}", SeedProductData.Products.Where(p => p.Id == id).FirstOrDefault());
+
+			var result1 = await sut.Handle(request, CancellationToken.None);
+
+			//Assert
+			_logger.VerifyLog(LogLevel.Information, "Get products from db", Times.Never());
+		}
+
+		[Fact]
+		public async Task Handler_ProductNotViaMemoryCache_ReturnProduct()
+		{
+			//Arrange
+			var id = 1;
+			sut = new GetProductQueryHandler(_context, _logger.Object, _cache);
+
+			var request = new GetProductQuery { Id = id };
+
+			//Act
+			await sut.Handle(request, CancellationToken.None);
+			_cache.TryGetValue<Product>($"productapi_{id}", out var product);
+
+			//Assert
+			_logger.VerifyLog(LogLevel.Information, "Get products from db");
+			Assert.Equal(SeedProductData.Products.Where(p => p.Id == id).FirstOrDefault(), product);
 		}
 
 	}
